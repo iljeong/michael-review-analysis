@@ -1,0 +1,12 @@
+# 가상환경 / 파이썬 캐시
+.venv/
+__pycache__/
+*.pyc
+
+# 툴 아티팩트
+.codegraph
+.DS_Store
+
+# 임시 검수/로그 파일
+스크립트/_tire_precision_sample.csv
+스크립트/*.log

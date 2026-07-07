@@ -1,0 +1,75 @@
+# 마이클 앱 리뷰 측면 사전 (taxonomy) — v0 초안
+# 용도: (1) ABSA 라벨 정의  (2) BERTopic 클러스터 → 측면 매핑 기준
+#       (3) 임베딩 자동분류의 seed 키워드
+# 원칙: 한 리뷰가 여러 측면을 가질 수 있음(multi-label). "앱 경험"과 "오프라인 서비스"를 분리한다.
+#       마이클은 앱(온라인 예약) + 실제 정비소(오프라인 시공)가 결합된 O2O라
+#       불만이 앱 때문인지 정비소 때문인지 구분하는 게 핵심.
+
+version: v0-draft
+domain: 자동차 정비 예약 O2O 플랫폼
+
+aspects:
+  # ── 온라인/앱 측면 ──
+  - id: booking
+    label: 예약/대기
+    scope: online
+    seeds: [예약, 예약하기, 당일예약, 주말예약, 대기, 예약변경, 예약취소, 시간대, 슬롯, 마감]
+  - id: price_estimate
+    label: 가격·견적 투명성
+    scope: online
+    seeds: [가격, 견적, 비용, 요금, 투명, 바가지, 추가비용, 미리, 비쌈, 저렴, 정찰]
+  - id: app_ux
+    label: 앱 UX/버그/성능
+    scope: online
+    seeds: [앱, 로그인, 오류, 버그, 튕김, 느림, 업데이트, 화면, 편함, 불편, 인증, 로딩]
+  - id: payment_membership
+    label: 결제/멤버십/쿠폰/포인트
+    scope: online
+    seeds: [결제, 카드, 쿠폰, 포인트, 적립, 멤버십, 구독, 할인, 프로모션, 환불, 정산]
+  - id: car_management
+    label: 내차관리/리포트/교체주기 알림
+    scope: online
+    seeds: [교체주기, 알림, 차량관리, 리포트, 주행거리, 정비내역, 이력, 차량번호, 자동입력]
+
+  # ── 오프라인/정비소 측면 ──
+  - id: service_quality
+    label: 정비 품질/시공 결과
+    scope: offline
+    seeds: [정비, 시공, 교체, 품질, 꼼꼼, 재방문, 하자, 미흡, 문제해결, 점검, A/S]
+  - id: staff_response
+    label: 정비소·기사 응대/친절
+    scope: offline
+    seeds: [기사, 사장님, 직원, 친절, 불친절, 응대, 설명, 상담, 태도, 매장, 서비스]
+  - id: wait_onsite
+    label: 현장 대기/소요시간
+    scope: offline
+    seeds: [기다림, 대기시간, 오래, 빨리, 신속, 시간, 늦음, 예약시간, 지연]
+  - id: location_coverage
+    label: 정비소 위치/커버리지/입점수
+    scope: offline
+    seeds: [위치, 근처, 지역, 매장수, 제휴, 입점, 없음, 멀다, 지방, 커버리지]
+
+  # ── 세부 서비스 카테고리 (측면과 교차 태깅) ──
+  - id: svc_engineoil
+    label: 엔진오일
+    scope: service_type
+    seeds: [엔진오일, 오일교환, 오일교체, 합성유]
+  - id: svc_tire
+    label: 타이어
+    scope: service_type
+    seeds: [타이어, 휠, 얼라인먼트, 펑크, 공기압]
+  - id: svc_wash
+    label: 세차
+    scope: service_type
+    seeds: [세차, 손세차, 디테일링, 광택, 실내세차]
+
+# ── 유도/템플릿 리뷰 탐지 시그널 (진위 필터용) ──
+incentivized_signals:
+  - 쿠폰_대가: [쿠폰받, 포인트받, 적립받, 리뷰쓰면, 리뷰이벤트, 별점이벤트]
+  - 템플릿_징후: [매우 만족, 짧은_극찬만_반복, 서비스_내용_없음]  # 본문 5어절 미만 + 5점
+  - 노트: "본문 없이 별점만 / 유도 문구 포함 / 극단적 짧은 극찬은 별도 플래그 후 민감도 분석에서 제외 검토"
+
+notes:
+  - "online vs offline 분리가 이 앱 분석의 최대 차별점 — 마이클이 통제 가능한 건 online, 정비소 품질은 부분 통제."
+  - "service_type은 측면(aspect)과 직교(orthogonal)하게 태깅 → '타이어 시공품질 불만' 같은 교차 분석 가능."
+  - "v0는 가설. Phase 3 BERTopic 결과로 측면 추가/병합 후 v1 확정."
